@@ -1,0 +1,52 @@
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.2.0/socket.io.js"></script>
+    <script>
+function initializeSocket(token) {
+    const socket = io({
+        auth: {
+            token,
+        },
+    });
+
+    socket.on('messages', (messages) => {
+        const ul = document.getElementById('messages');
+        messages.forEach((message) => {
+            const li = document.createElement('li');
+            const username = message.user ? message.user.displayName : 'Unknown User';
+            li.textContent = `${username}: ${message.text}`;
+            ul.appendChild(li);
+        });
+    });
+
+    socket.on('newMessage', (message) => {
+        const ul = document.getElementById('messages');
+        const li = document.createElement('li');
+        const username = message.user ? message.user.displayName : 'Unknown User';
+        li.textContent = `${username}: ${message.text}`;
+        ul.appendChild(li);
+    });
+
+    socket.on('deleteMessage', (messageId) => {
+        const li = document.getElementById(messageId);
+        if (li) {
+            li.remove();
+        }
+    });
+
+    document.getElementById('form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const input = document.getElementById('message');
+        const text = input.value.trim();
+        if (text) {
+
+            const user = {
+                displayName: 'hum hai user'
+            };
+            const message = { id: Date.now(), user, text };
+            socket.emit('newMessage', message);
+            input.value = '';
+        }
+    });
+}
+
+</script>

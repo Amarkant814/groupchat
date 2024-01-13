@@ -1,0 +1,21 @@
+body{
+    background: #007bff85;
+}
+
+ul{
+    list-style-type: none;
+}
+
+#login-form{
+    display: grid;
+    justify-content: center;
+    text-align: center;
+    margin: auto;
+}
+
+#chat{
+    display: grid;
+    justify-content: center;
+    text-align: center;
+    margin: auto;
+}
