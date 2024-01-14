@@ -508,3 +508,13 @@ $text-1: #393640;
     display: block;
     width: 100%;
 }
+
+.group-info{
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.info-section{
+    margin: 60px;
+}

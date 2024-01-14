@@ -6,6 +6,8 @@ import PrimeVue from "primevue/config";
 import Toast from "primevue/toast";
 import ToastService from "primevue/toastservice";
 import OverlayPanel from 'primevue/overlaypanel';
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
 
 import { Form, InputValidator, ErrorMessage } from "./plugins/validate";
 
@@ -37,6 +39,8 @@ app.component("InputValidator", InputValidator);
 app.component("ErrorMessage", ErrorMessage);
 app.component("Toast", Toast);
 app.component("OverlayPanel", OverlayPanel);
+app.component("DataTable", DataTable);
+app.component("Column", Column);
 
 app.use(ToastService);
 app.use(PrimeVue);

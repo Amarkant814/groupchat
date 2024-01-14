@@ -11,12 +11,6 @@
           <!-- Other child divs within the second nested div -->
           <div class="other-child-div-1">Let’s Conect</div>
           <div class="other-child-div-2">One click away from your Circle!!</div>
-          <div class="other-child-div-3">
-            Nisi nunc et mi egestas nibh eget. Est cras suspendisse id erat elit
-            felis, eu. Sollicitudin ullamcorper massa dictum enim id malesuada
-            orci nibh pulvinar. Sed at feugiat arcu lorem et porttitor.
-            Scelerisque amet orci congue dignissim.
-          </div>
         </div>
 
         <div class="frame-5">
@@ -93,7 +87,7 @@
               <div class="other-child-div-1">
                 <div class="nested-div-1">
                   <div class="child-div-1">
-                    <small class="auth-text">Already Registered?&nbsp;<router-link to="/">Log In</router-link></small>
+                    <small class="auth-text">Already Registered? <router-link to="/">Log In</router-link></small>
                   </div>
                 </div>
               </div>

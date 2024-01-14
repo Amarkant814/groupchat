@@ -6,6 +6,7 @@ export default {
     selectedChatId: 1,
     chats: [],
     users: [],
+    groupInfo: {}
   },
   getters: {
     getChats: (state) => {
@@ -19,7 +20,8 @@ export default {
   
       return sortedChats;
     },
-    getAllUsers: (state) => state.users
+    getAllUsers: (state) => state.users,
+    getGroupInfo: (state) => state.groupInfo
   },
   mutations: {
     SET_ALL_USERS(state, resp) {
@@ -40,6 +42,9 @@ export default {
     ADD_CHAT(state, payload) {
       state.chats.push(payload);
     },
+    SET_GROUP_INFO(state, payload){
+      state.groupInfo = payload.groupData
+    }
   },
   actions: {
     async fetchAllUsers({ commit }, payload) {
@@ -82,6 +87,17 @@ export default {
         payload.api,
         { isMock: false }
       );
+      return resp;
+    },
+    async fetchGroupUsers({ commit }, payload) {
+      const resp = await axiosWebApi.post(
+        Api.chat.groupInfo,
+        payload,
+        { isMock: false }
+      );
+      if(resp.status == 200){
+        commit('SET_GROUP_INFO',resp.data)
+      }
       return resp;
     },
   },

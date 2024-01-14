@@ -64,11 +64,15 @@
           <div class="text">
             {{ messages?.name }}
 
-            <img class="img-info" src="./../assets/images/info_outline.svg" alt="" />
+            <span class="group-info">
+              <i class="pi pi-info-circle" v-if="!showGroupData" @click="groupInfo('show')"></i>
+              <i class="pi pi-times" v-else @click="groupInfo('hide')"></i>
+            </span>
           </div>
-          <IndividualChat :messages="messages"/>
+          <GroupInfo v-if="showGroupData" :info="dispGroupInfo"/>
+          <IndividualChat :messages="messages" v-else/>
         </div>
-        <div class="chat-text-field">
+        <div class="chat-text-field" v-if="!showGroupData">
           <Form @submit="sendChatMessage()" ref="sendSMS">
             <div class="chat-input-field">
               <!-- <img class="img-info" src="./../assets/images/attach_file.svg" alt="" /> -->
@@ -141,6 +145,7 @@ import InputText from "primevue/inputtext";
 import MultiSelect from "primevue/multiselect"
 import Button from "primevue/button";
 import IndividualChat from "./IndividualChat.vue";
+import GroupInfo from "./groupInfo.vue"
 import { mapActions, mapGetters } from "vuex";
 import { v4 as uuidv4 } from "uuid";
 import io from "socket.io-client"
@@ -163,6 +168,8 @@ export default {
       userEmail: '',
       userName: '',
       userPass: '',
+      showGroupData: false,
+      dispGroupInfo:{}
     };
   },
   components: {
@@ -170,6 +177,7 @@ export default {
     Button,
     IndividualChat,
     MultiSelect,
+    GroupInfo
   },
   computed: {
     ...mapGetters({
@@ -192,8 +200,18 @@ export default {
       AddMessagesInStore: "AddMessagesInStore",
       fetchAllUsers: "fetchAllUsers",
       createGroup: "createGroup",
-      signupApi: "signupApi"
+      signupApi: "signupApi",
+      fetchGroupUsers: "fetchGroupUsers"
     }),
+    async groupInfo(type = 'hide'){
+      this.showGroupData = !this.showGroupData
+      if(type == 'show'){
+        const resp = await this.fetchGroupUsers({ groupID: this.messages.id})
+        if (resp.status == 200){
+          this.dispGroupInfo = resp.data
+        }
+      }
+    },
     toggleProfile(e) {
       this.$refs.profileOverlay.toggle(e);
     },
@@ -232,7 +250,7 @@ export default {
       await this.AddMessagesInStore(final_payload);
       this.socket.emit('newMessage', payload);
       this.displayChats = this.getChats;
-      this.messages = this.getChats[0];
+      this.messages = this.getChats.find(el => el.id == this.messages.id);
       this.$refs.chatContainer.scrollTop = this.$refs.chatContainer.scrollHeight;
     },
     async addGroup() {
@@ -260,6 +278,7 @@ export default {
     },
     openChat(item) {
       this.messages = item;
+      this.showGroupData = false;
     },
     getShortNameForChats(item) {
       const name = item.split(" ");

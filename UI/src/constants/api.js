@@ -8,7 +8,8 @@ export default {
     getAllUsers: '/api/getusers',
     createGroup: '/api/addgroup',
     getAllChats: '/api/groups',
-    sendChat: '/api/chat'
+    sendChat: '/api/chat',
+    groupInfo: '/api/groupinfo'
   },
   messageBoard: {
     setUserNames: devAssignment + "userInfo/",
