@@ -57,6 +57,7 @@ router.post('/addgroup',async (req,res) => {
         await t.commit();
     } catch (error) {
         await t.rollback();
+        res.status(500).json({error: SERVER_ERROR})
     }
 
     res.status(201).json({info:'Created successfully'})
@@ -110,6 +111,7 @@ router.get('/groups', async (req,res) => {
 
     } catch (error) {
         console.log(error.message)
+        res.status(500).json({error: SERVER_ERROR})
     }
     res.status(200).json({chats:groupList})
 })
@@ -126,8 +128,35 @@ router.post('/chat', async (req,res) => {
         const msg_resp = await db.Messages.create(payload)
     } catch (error) {
         console.log('Error: '+error.message)
+        res.status(500).json({error: SERVER_ERROR})
     }
-    res.status(201).json({info: 'Api hit received'})
+    res.status(201).json({info: 'Message Sent'})
+})
+
+router.post('/groupinfo', async (req,res) => {
+    const {groupID } = req.body
+    let user_info = {}
+    try {
+        const group_info = await db.Groups.findAll({ where: {id: groupID}})
+        user_info = await db.GroupUserMap.findAll({
+            where: {
+                group_id : groupID
+            }, 
+            include: [
+                {
+                    model: db.User,
+                    attributes: ['id', 'username', 'email'], 
+                    as: 'user',
+                }
+            ]
+        })
+        user_info = user_info.map(el => el.user)
+        user_info = {user_info,group_info}
+    } catch (error) {
+        console.log('Error: '+error.message)
+        res.status(500).json({error: SERVER_ERROR})
+    }
+    res.status(200).json({groupData:user_info})
 })
 
 

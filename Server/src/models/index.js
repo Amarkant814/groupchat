@@ -32,6 +32,9 @@ fs.readdirSync(__dirname)
 db.Messages.belongsTo(db.User, { foreignKey: 'sent_by', as: 'sender'});
 db.User.hasMany(db.Messages, { foreignKey: 'sent_by' });
 
+db.GroupUserMap.belongsTo(db.User, { foreignKey: 'user_id', as: 'user'});
+db.User.hasMany(db.GroupUserMap, { foreignKey: 'user_id' });
+
 
 
  
