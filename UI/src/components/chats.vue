@@ -66,16 +66,16 @@
 
             <img class="img-info" src="./../assets/images/info_outline.svg" alt="" />
           </div>
-          <IndividualChat :messages="messages" />
+          <IndividualChat :messages="messages"/>
         </div>
         <div class="chat-text-field">
-          <Form @submit="sendChatMessage" ref="sendSMS">
+          <Form @submit="sendChatMessage()" ref="sendSMS">
             <div class="chat-input-field">
               <!-- <img class="img-info" src="./../assets/images/attach_file.svg" alt="" /> -->
 
               <InputText field="addNewMessage" v-model="addNewMessage" />
               <button type="submit" class="img-add">
-                <img @click="sendChatMessage" src="./../assets/images/send.svg" alt="" />
+                <img src="./../assets/images/send.svg" alt="" />
               </button>
             </div>
           </Form>
@@ -92,7 +92,7 @@
     </div>
 
     <template #footer>
-      <Button label="Create" icon="pi pi-check" :disabled="checkFilled" @click="AddDialogChat" autofocus />
+      <Button label="Create" icon="pi pi-check" :disabled="checkFilled" @click="addGroup" autofocus />
     </template>
   </Dialog>
 
@@ -215,6 +215,11 @@ export default {
         return;
       }
       let payload = {
+        groupID: this.messages.id,
+        content: this.addNewMessage,
+      };
+      let final_payload = {
+        api:{...payload},
         chatId: this.messages.id,
         messages: {
           id: uuidv4(),
@@ -223,13 +228,14 @@ export default {
           timestamp: new Date().toISOString(),
         },
       };
-      this.socket.emit('newMessage', payload);
-      await this.AddMessagesInStore(payload);
-      this.displayChats = this.getChats;
-      this.$refs.chatContainer.scrollTop = this.$refs.chatContainer.scrollHeight;
       this.addNewMessage = "";
+      await this.AddMessagesInStore(final_payload);
+      this.socket.emit('newMessage', payload);
+      this.displayChats = this.getChats;
+      this.messages = this.getChats[0];
+      this.$refs.chatContainer.scrollTop = this.$refs.chatContainer.scrollHeight;
     },
-    async AddDialogChat() {
+    async addGroup() {
       // let ayload = {
       //   userS: this.
       // }
@@ -240,9 +246,15 @@ export default {
         createdAt: new Date().toISOString(),
         messages: [],
       };
+      let api_payload = {
+        groupname: this.contentValue,
+        users: this.selectedUsers.map(item => item.id)
+      }
       await this.AddChatInStore(payload);
+      await this.createGroup(api_payload);
       this.displayChats = this.getChats;
       this.messages = this.getChats;
+      this.selectedUsers = [];
       this.contentValue = "";
       this.visible = false;
     },

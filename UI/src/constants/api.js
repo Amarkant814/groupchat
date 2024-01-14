@@ -7,6 +7,8 @@ export default {
   chat:{
     getAllUsers: '/api/getusers',
     createGroup: '/api/addgroup',
+    getAllChats: '/api/groups',
+    sendChat: '/api/chat'
   },
   messageBoard: {
     setUserNames: devAssignment + "userInfo/",

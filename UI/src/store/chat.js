@@ -34,7 +34,7 @@ export default {
     ADD_MESSAGE(state, { chatId, messages }) {
       const chat = state.chats.find((c) => c.id === chatId);
       if (chat) {
-        chat.messages.push(messages);
+        chat.msgs.push(messages);
       }
     },
     ADD_CHAT(state, payload) {
@@ -62,10 +62,10 @@ export default {
       return resp;
     },
     async getAllChats({ commit }, payload) {
-      const resp = await axiosWebApi.post(
-        Api.messageBoard.getAllChats,
+      const resp = await axiosWebApi.get(
+        Api.chat.getAllChats,
         {},
-        { isMock: true }
+        { isMock: false }
       );
       if (resp.status == 200) {
         commit("SET_ALL_CHATS", resp.data);
@@ -77,6 +77,12 @@ export default {
     },
     async AddMessagesInStore({ commit }, payload) {
       commit("ADD_MESSAGE", payload);
+      const resp = await axiosWebApi.post(
+        Api.chat.sendChat,
+        payload.api,
+        { isMock: false }
+      );
+      return resp;
     },
   },
 };

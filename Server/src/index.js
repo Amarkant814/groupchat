@@ -67,7 +67,7 @@ io.on('connection', (socket) => {
 
   // Listen for new messages
   socket.on('newMessage', (message) => {
-    console.log(message.messages.content)
+    console.log(message.content)
     messages.push({...message, user :{ displayName: user}});
     io.emit('newMessage', message);
   });

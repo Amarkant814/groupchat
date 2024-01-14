@@ -20,8 +20,8 @@
           <span class="message-display">
             <div class="msg-bar">
               <span class="message-content">{{ item.content }}</span>
-              <span><i class="pi pi-heart"></i></span>
-              <span><i class="pi pi-heart-fill"></i></span>
+              <span class="flex align-items-center" v-if="item.likes && showLike && showLike.mid"><span class="" ><i class="pi pi-heart-fill" @click="addOrRemoveLike(item.id,'unlike')" ></i><span>{{ item.likes }}</span></span></span>
+              <span v-else> <i class="pi pi-heart"  @click="addOrRemoveLike(item.id,'like')"></i></span>
             </div>
             <span class="message-time">{{ formatDate(item.timestamp) }}</span>
           </span>
@@ -90,7 +90,6 @@ export default {
   },
   mounted() {
     this.$refs.chatContainer.scrollTop = this.$refs.chatContainer.scrollHeight;
-
   }
 };
 </script>

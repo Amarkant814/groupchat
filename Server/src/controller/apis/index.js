@@ -4,9 +4,7 @@ const pool = require('../../connection');
 const router = express.Router();
 const moment = require('moment')
 const db = require('../../models');
-const { random } = require('lodash');
-
-
+const Op = db.Sequelize.Op;
 
 
 
@@ -52,7 +50,7 @@ router.post('/addgroup',async (req,res) => {
                 status: 1,
                 role: item == req.user.id?1:2
             }))
-            const addedUsers= await db.User.bulkCreate(userGroupMap, {
+            const addedUsers= await db.GroupUserMap.bulkCreate(userGroupMap, {
                 transaction:t
             })
         }
@@ -63,5 +61,74 @@ router.post('/addgroup',async (req,res) => {
 
     res.status(201).json({info:'Created successfully'})
 });
+
+router.get('/groups', async (req,res) => {
+    let groupList = []
+    try {
+        const resp = await db.GroupUserMap.findAll({where:{ user_id: req.user.id}})
+        const groupIds = resp.map(item => item.group_id)
+        const grp_resp = await db.Groups.findAll({where:{ id: groupIds}, order:[['created_on','DESC']]})
+        const msg_resp = await db.Messages.findAll({
+            where: { 
+                group_id : groupIds
+            }, 
+            include: [
+                {
+                    model: db.User,
+                    attributes: ['id', 'username', 'email'], 
+                    as: 'sender',
+                }
+            ]
+        })
+        grp_resp.forEach(item => {
+            item = {
+                id: item.id,
+                name: item.groupname,
+                createdAt: item.created_on,
+                msgs: [],
+            }
+            let retVal = [];
+            let msg_content = msg_resp.filter(el => {
+                if(el.group_id == item.id){
+                    retVal.push({
+                        id: el.id,
+                        content: el.message,
+                        sender: el.sender.username,
+                        timestamp: el.created_on,
+                        likes: el.likes
+                    })
+                }
+                return retVal
+            })
+            item.msgs = retVal
+
+
+            groupList.push(item)
+        })
+
+
+
+    } catch (error) {
+        console.log(error.message)
+    }
+    res.status(200).json({chats:groupList})
+})
+
+router.post('/chat', async (req,res) => {
+    const {groupID, content } = req.body
+    let payload = {
+        message: content,
+        sent_by: req.user.id,
+        group_id: groupID,
+        created_on: moment().format('YYYY-MM-DD HH:mm:ss')
+    }
+    try {
+        const msg_resp = await db.Messages.create(payload)
+    } catch (error) {
+        console.log('Error: '+error.message)
+    }
+    res.status(201).json({info: 'Api hit received'})
+})
+
 
 module.exports = router

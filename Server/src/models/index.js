@@ -29,6 +29,11 @@ fs.readdirSync(__dirname)
         db[model.name] = model; 
     });
 
+db.Messages.belongsTo(db.User, { foreignKey: 'sent_by', as: 'sender'});
+db.User.hasMany(db.Messages, { foreignKey: 'sent_by' });
+
+
+
  
 module.exports = _.extend({
     sequelize,

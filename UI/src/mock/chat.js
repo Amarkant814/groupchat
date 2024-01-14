@@ -93,6 +93,20 @@ const chats = {
             },
           ],
         },
+        {
+          id: 7,
+          name: 'My Family',
+          createdAt: '2023-01-02T08:30:00Z',
+          msgs: [
+            {
+              id: 1,
+              content: 'Hey everyone! Excited to join this chat.',
+              sender: 'newuser1@yopmail.com',
+              timestamp: '2023-01-02T08:35:00Z',
+              likes: 0
+            },
+          ],
+        },
       ],
     }
   };
