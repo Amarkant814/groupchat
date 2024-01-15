@@ -67,9 +67,10 @@ io.on('connection', (socket) => {
 
   // Listen for new messages
   socket.on('newMessage', (message) => {
-    console.log(message.content)
+    console.log(message)
     messages.push({...message, user :{ displayName: user}});
     io.emit('newMessage', message);
+    // io.to(message.groupID).emit('newMessage', message);
   });
 
   // Listen for message deletion
@@ -79,6 +80,11 @@ io.on('connection', (socket) => {
       const deletedMessage = messages.splice(index, 1)[0];
       io.emit('deleteMessage', deletedMessage.id);
     }
+  });
+
+  socket.on('joinRoom', (room) => {
+    socket.join(room.roomId);
+    console.log(`User joined room: ${room.roomId}`);
   });
 });
 

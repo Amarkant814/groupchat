@@ -9,7 +9,9 @@ export default {
     createGroup: '/api/addgroup',
     getAllChats: '/api/groups',
     sendChat: '/api/chat',
-    groupInfo: '/api/groupinfo'
+    groupInfo: '/api/groupinfo',
+    newParticipant: '/api/addparticipant',
+    deleteParticipant: '/api/deleteparticipant'
   },
   messageBoard: {
     setUserNames: devAssignment + "userInfo/",

@@ -55,12 +55,12 @@ router.post('/addgroup',async (req,res) => {
             })
         }
         await t.commit();
+        res.status(201).json({info:'Created successfully'})
     } catch (error) {
         await t.rollback();
         res.status(500).json({error: SERVER_ERROR})
     }
 
-    res.status(201).json({info:'Created successfully'})
 });
 
 router.get('/groups', async (req,res) => {
@@ -102,18 +102,13 @@ router.get('/groups', async (req,res) => {
                 return retVal
             })
             item.msgs = retVal
-
-
             groupList.push(item)
         })
-
-
-
+        res.status(200).json({chats:groupList})
     } catch (error) {
         console.log(error.message)
         res.status(500).json({error: SERVER_ERROR})
     }
-    res.status(200).json({chats:groupList})
 })
 
 router.post('/chat', async (req,res) => {
@@ -126,11 +121,13 @@ router.post('/chat', async (req,res) => {
     }
     try {
         const msg_resp = await db.Messages.create(payload)
+        if(msg_resp){
+            res.status(201).json({info: 'Message Sent'})
+        }
     } catch (error) {
         console.log('Error: '+error.message)
         res.status(500).json({error: SERVER_ERROR})
     }
-    res.status(201).json({info: 'Message Sent'})
 })
 
 router.post('/groupinfo', async (req,res) => {
@@ -140,7 +137,8 @@ router.post('/groupinfo', async (req,res) => {
         const group_info = await db.Groups.findAll({ where: {id: groupID}})
         user_info = await db.GroupUserMap.findAll({
             where: {
-                group_id : groupID
+                group_id : groupID,
+                status:1
             }, 
             include: [
                 {
@@ -152,11 +150,54 @@ router.post('/groupinfo', async (req,res) => {
         })
         user_info = user_info.map(el => el.user)
         user_info = {user_info,group_info}
+        res.status(200).json({groupData:user_info})
     } catch (error) {
         console.log('Error: '+error.message)
         res.status(500).json({error: SERVER_ERROR})
     }
-    res.status(200).json({groupData:user_info})
+})
+
+router.post('/addparticipant', async (req,res) => {
+    const {groupID, users} = req.body
+    let payload = []
+    try {
+        users.forEach(el => {
+            let item = {
+                user_id: el,
+                group_id: groupID,
+                status:1,
+                role: req.user.id == el?1:2
+            }
+            payload.push(item)
+        })
+        const resp = await db.GroupUserMap.bulkCreate(payload)
+        if(resp){
+            res.status(201).json({info: 'New Participants added'})
+        }
+    } catch (error) {
+        console.log('Error: '+error.message)
+        res.status(500).json({error:SERVER_ERROR})
+    }
+})
+
+router.post('/deleteparticipant',async (req,res) =>{
+    const {groupID, user} = req.body
+    try {
+        let update_data = {
+            status: 2
+        }
+        if(!groupID || ! user){
+            res.status(400).json({error:'User or Group not provided'})
+            return
+        }
+        const resp = db.GroupUserMap.update(update_data,{where: {group_id: groupID, user_id:user}})
+        if(resp){
+            res.status(200).json({info: 'User removed from group'})
+        }
+    } catch (error) {
+        console.log('Error: '+error.message)
+        res.status(500).json({error:SERVER_ERROR})
+    }
 })
 
 
