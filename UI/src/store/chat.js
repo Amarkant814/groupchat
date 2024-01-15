@@ -80,6 +80,9 @@ export default {
     async AddChatInStore({ commit }, payload) {
       commit("ADD_CHAT", payload);
     },
+    async AddChatLive({ commit }, payload) {
+      commit("ADD_MESSAGE", payload);
+    },
     async AddMessagesInStore({ commit }, payload) {
       commit("ADD_MESSAGE", payload);
       const resp = await axiosWebApi.post(
@@ -98,6 +101,22 @@ export default {
       if(resp.status == 200){
         commit('SET_GROUP_INFO',resp.data)
       }
+      return resp;
+    },
+    async addNewParticipant({ commit }, payload) {
+      const resp = await axiosWebApi.post(
+        Api.chat.newParticipant,
+        payload,
+        { isMock: false }
+      );
+      return resp;
+    },
+    async deleteUserFromGroup({ commit }, payload) {
+      const resp = await axiosWebApi.post(
+        Api.chat.deleteParticipant,
+        payload,
+        { isMock: false }
+      );
       return resp;
     },
   },

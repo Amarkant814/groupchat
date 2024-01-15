@@ -8,7 +8,7 @@
         </InputText>
         <img class="img-search" src="./../assets/images/search.svg" alt="" />
       </div>
-      <span class="user-txt" @click="toggleProfile"> <i class="pi pi-user"></i></span>
+      <span class="user-txt" @click="toggleProfile"> {{ getUserName[0].toUpperCase() }}</span>
     </div>
 
 
@@ -201,7 +201,8 @@ export default {
       fetchAllUsers: "fetchAllUsers",
       createGroup: "createGroup",
       signupApi: "signupApi",
-      fetchGroupUsers: "fetchGroupUsers"
+      fetchGroupUsers: "fetchGroupUsers",
+      AddChatLive: "AddChatLive",
     }),
     async groupInfo(type = 'hide'){
       this.showGroupData = !this.showGroupData
@@ -228,7 +229,6 @@ export default {
       await this.fetchAllUsers();
     },
     async sendChatMessage() {
-      // this.sendMessage();
       if (!this.addNewMessage) {
         return;
       }
@@ -248,16 +248,12 @@ export default {
       };
       this.addNewMessage = "";
       await this.AddMessagesInStore(final_payload);
-      this.socket.emit('newMessage', payload);
+      this.socket.emit('newMessage', final_payload);
       this.displayChats = this.getChats;
       this.messages = this.getChats.find(el => el.id == this.messages.id);
       this.$refs.chatContainer.scrollTop = this.$refs.chatContainer.scrollHeight;
     },
     async addGroup() {
-      // let ayload = {
-      //   userS: this.
-      // }
-
       let payload = {
         id: uuidv4(),
         name: this.contentValue,
@@ -270,6 +266,11 @@ export default {
       }
       await this.AddChatInStore(payload);
       await this.createGroup(api_payload);
+      const roomInfo = {
+        roomId: this.messages.id,
+        ...api_payload
+      }
+      this.socket.emit('joinRoom',roomInfo)
       this.displayChats = this.getChats;
       this.messages = this.getChats;
       this.selectedUsers = [];
@@ -291,9 +292,6 @@ export default {
     sendMessage() {
       // Emit a 'newMessage' event to the server
       this.socket.emit('newMessage', { text: this.addNewMessage });
-
-      // Clear the input field after sending the message
-      this.newMessage = '';
     },
     formatDate(value) {
       const dateObject = new Date(value);
@@ -326,17 +324,16 @@ export default {
       },
     })
 
-    // Listen for 'messages' event and update the messages array
     this.socket.on('messages', (messages) => {
       this.chatMessages = messages;
     });
 
-    // Listen for 'newMessage' event and update the messages array
     this.socket.on('newMessage', (message) => {
-      this.chatMessages.push(message);
+      if(message.messages.sender != this.getUserName){
+        this.AddChatLive(message)
+      }
     });
 
-    // Listen for 'deleteMessage' event and remove the deleted message from the array
     this.socket.on('deleteMessage', (messageId) => {
       this.chatMessages = this.messages.filter((msg) => msg.id !== messageId);
     });
