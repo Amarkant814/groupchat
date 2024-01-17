@@ -15,7 +15,7 @@
     <OverlayPanel ref="profileOverlay" class="profile-panel">
       <div class="profile-overlay">
         <hr class="m-t-2" />
-        <div class="add-user" @click="showUserDialog = true">
+        <div class="add-user" @click="addUserDialog">
           Add Users
         </div>
         <hr class="m-t-2" />
@@ -70,13 +70,11 @@
             </span>
           </div>
           <GroupInfo v-if="showGroupData" :info="dispGroupInfo"/>
-          <IndividualChat :messages="messages" v-else/>
+          <IndividualChat :messages="messages" v-else @likeChat="refreshMessage"/>
         </div>
         <div class="chat-text-field" v-if="!showGroupData">
           <Form @submit="sendChatMessage()" ref="sendSMS">
             <div class="chat-input-field">
-              <!-- <img class="img-info" src="./../assets/images/attach_file.svg" alt="" /> -->
-
               <InputText field="addNewMessage" v-model="addNewMessage" />
               <button type="submit" class="img-add">
                 <img src="./../assets/images/send.svg" alt="" />
@@ -134,7 +132,7 @@
     </Form>
 
     <template #footer>
-      <Button label="Add User" type="submit" icon="pi pi-plus" :disabled="checkUserFilled" autofocus />
+      <Button label="Add User" type="button" icon="pi pi-plus" :disabled="checkUserFilled" autofocus @click="addNewUser"/>
     </template>
   </Dialog>
 </template>
@@ -183,7 +181,8 @@ export default {
     ...mapGetters({
       getChats: "getChats",
       getUserName: "getUserName",
-      getAllUsers: "getAllUsers"
+      getAllUsers: "getAllUsers",
+      getUserRole: "getUserRole"
     }),
     checkFilled() {
       return (!this.contentValue || this.selectedUsers.length == 0)
@@ -204,6 +203,16 @@ export default {
       fetchGroupUsers: "fetchGroupUsers",
       AddChatLive: "AddChatLive",
     }),
+    addUserDialog(){
+      if(this.getUserRole != 1){
+        this.$toast.add({summary:'Only admins add new users', severity:'warn', life:3000})
+        return
+      }
+      this.showUserDialog = true
+    },
+    async refreshMessage(data){
+      this.socket.emit('like',data)
+    },
     async groupInfo(type = 'hide'){
       this.showGroupData = !this.showGroupData
       if(type == 'show'){
@@ -217,6 +226,7 @@ export default {
       this.$refs.profileOverlay.toggle(e);
     },
     async addNewUser() {
+      debugger
       const resp = await this.signupApi({ email: this.userEmail, username: this.userName, password: this.userPass, role: 2 });
       if (resp.status == 201) {
         this.$toast.add({ summary: "User added successfully", severity: "success", life: 3000 })
@@ -224,6 +234,10 @@ export default {
       this.showUserDialog = false
     },
     async AddChats() {
+      if(this.getUserRole != 1){
+        this.$toast.add({summary:'Only admins can create new group', severity:'warn', life:3000})
+        return
+      }
       this.isUserSelected = false;
       this.visible = true;
       await this.fetchAllUsers();
@@ -266,11 +280,6 @@ export default {
       }
       await this.AddChatInStore(payload);
       await this.createGroup(api_payload);
-      const roomInfo = {
-        roomId: this.messages.id,
-        ...api_payload
-      }
-      this.socket.emit('joinRoom',roomInfo)
       this.displayChats = this.getChats;
       this.messages = this.getChats;
       this.selectedUsers = [];
@@ -337,6 +346,13 @@ export default {
     this.socket.on('deleteMessage', (messageId) => {
       this.chatMessages = this.messages.filter((msg) => msg.id !== messageId);
     });
+
+    this.socket.on('like',async (data)=>{
+      let c = this
+      await this.getAllChats();
+      this.messages = this.getChats.find(el => el.id == data.group_id);
+      this.displayChats = this.getChats;
+    })
 
 
   },

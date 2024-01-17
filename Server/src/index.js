@@ -6,12 +6,10 @@ const socketIo = require('socket.io');
 const pool = require('./connection');
 const path = require('path')
 const cors = require('cors')
-
 const app = express();
 const server = require('http').createServer(app);
 const io = socketIo(server, {cors: {origin: "*"}});
 const db = require('./models')
-
 const authapi = require('./controller/auth');
 const apis = require('./controller/apis')
 const { SECRET_KEY, PORT_CONFOG } = require('./config/config');
@@ -32,17 +30,9 @@ app.use(cors())
 app.use('/auth', authapi);
 app.use('/api',passport.authenticate('jwt', {session: false}), apis)
 
-
-
-
 const messages = [];
 const users = [];
 
-
-
-
-
-// Socket.io events
 io.use((socket, next) => {
   const token =   socket.handshake.auth.token;
   jwt.verify(token, SECRET_KEY, (err, decoded) => {
@@ -57,20 +47,20 @@ io.on('connection', (socket) => {
 
 
 
-  // Store user information in memory
-  // users[user.id] = user;
-
   io.emit('connection',socket=>{messages.push(socket)})
 
   // Send existing messages to the connected user
   socket.emit('messages', messages);
+
+  socket.on('like',(data)=>{
+    io.emit('like',data)
+  })
 
   // Listen for new messages
   socket.on('newMessage', (message) => {
     console.log(message)
     messages.push({...message, user :{ displayName: user}});
     io.emit('newMessage', message);
-    // io.to(message.groupID).emit('newMessage', message);
   });
 
   // Listen for message deletion
@@ -92,3 +82,4 @@ io.on('connection', (socket) => {
 server.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
+module.exports = app

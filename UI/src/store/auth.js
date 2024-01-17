@@ -6,16 +6,19 @@ import router from "@/router.js";
 export default {
   state: {
     username: sessionStorage.getItem('atoken')?JSON.parse(atob(sessionStorage.getItem('atoken').split('.')[1])).name:"",
+    user_role: sessionStorage.getItem('atoken')?JSON.parse(atob(sessionStorage.getItem('atoken').split('.')[1])).role:"",
     isLoggedIn: sessionStorage.getItem('atoken')?true:false,
   },
   getters: {
     getUserName: (state) => state.username,
+    getUserRole: (state) => state.user_role,
     getLoggedIn: (state) => state.isLoggedIn,
   },
   mutations: {
     SET_USER(state, resp) {
       if(resp.token){
         state.username = JSON.parse(atob(resp.token.split('.')[1])).name
+        state.user_role = JSON.parse(atob(resp.token.split('.')[1])).role
         sessionStorage.setItem('atoken',resp.token)
         state.isLoggedIn = true
         router.push({name:'chats'})

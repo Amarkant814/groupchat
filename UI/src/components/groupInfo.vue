@@ -20,8 +20,8 @@
           </template>
         </Column>
         <Column field="actions" :header="`Action`">
-          <template #body="{slotProps}">
-            <span style="cursor: pointer;" @click="removeDialog(slotProps)"><i class="pi pi-trash"></i></span>
+          <template #body="slotProps">
+            <span style="cursor: pointer;" @click="removeDialog(slotProps.data)"><i class="pi pi-trash"></i></span>
           </template>
         </Column>
       </DataTable>
@@ -101,7 +101,8 @@
       ...mapActions({
         fetchAllUsers: "fetchAllUsers",
         addNewParticipant: "addNewParticipant",
-        deleteUserFromGroup: "deleteUserFromGroup"
+        deleteUserFromGroup: "deleteUserFromGroup",
+        fetchGroupUsers: 'fetchGroupUsers'
       }),
       removeDialog(data){
         this.deletedUser = data.id
@@ -115,6 +116,8 @@
         const resp = await this.deleteUserFromGroup(payload)
         if(resp.status == 200){
           this.$toast.add({severity:'success', summary: 'User Removed from group ', life:3000})
+          this.showRemoveUser = false;
+          await this.fetchGroupUsers({ groupID: this.getGroupInfo.group_info[0].id})
         }
       },
       async addNewUser(){
@@ -130,6 +133,7 @@
         if(resp.status == 201 ){
           this.$toast.add({severity:'success', summary: 'New Users Added ', life:3000})
           this.showAddUser = false;
+          await this.fetchGroupUsers({ groupID: this.getGroupInfo.group_info[0].id})
         }
       }
     },

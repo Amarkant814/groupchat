@@ -92,6 +92,9 @@ export default {
         sessionStorage.setItem("atoken", resp.data.token);
         this.$router.push("/chats");
       }
+      else if(resp.status == 400){
+        this.$toast.add({summary:resp.data.msg, severity:'error', life:3000})
+      }
     },
   },
   async mounted() {

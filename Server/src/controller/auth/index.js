@@ -16,7 +16,7 @@ router.post('/login', (req, res, next) => {
           status: 'error',
         });
       } else if (!user) {
-        return res.json({ token: false });
+        return res.status(400).json({ token: false , msg:'Invalid Credentials' });
       }
       let token;
       const userDetails = {
@@ -36,6 +36,8 @@ router.post('/login', (req, res, next) => {
 router.post('/signup', (req, res) => {
     const { username, email, password, role} = req.body;
 
+    const c = req?.user?.id
+    debugger
 
     const query = `INSERT INTO users ( email, username, password, role) VALUES ('${email}', '${username}', '${password}', ${role})`
 

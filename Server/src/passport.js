@@ -25,14 +25,7 @@ passport.use(new JsonStrategy({
   if (password == user.password) {
     return cb(null, user);
   }
-  // return bcrypt.compare(password, user.password).then((valid) => {
-  //   if (valid) {
-  //     return cb(null, user);
-  //   }
-  //   return cb(null, false);
-  // }).catch((err) => {
-  //   cb(new Error({ 'passport error': 101 }));
-  // });
+  return cb(null, false);
 }).catch((err) => {
   cb(new Error({ 'passport error': 102 }));
 })));

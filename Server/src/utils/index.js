@@ -1,5 +1,9 @@
 const crypto = require('crypto');
 const db = require('../models');
+const _ = require('lodash');
+
+const convertDBRespToObject = dbResp => _.map(dbResp, item => item.get({ plain: true }));
+
 
 // Custom middleware to check if the bearer token is present in the invalid_tokens table
 const checkTokenValidity = async (req, res, next) => {
@@ -26,5 +30,6 @@ const checkTokenValidity = async (req, res, next) => {
 
 
 module.exports = {
-  checkTokenValidity
+  checkTokenValidity,
+  convertDBRespToObject
 }

@@ -119,5 +119,21 @@ export default {
       );
       return resp;
     },
+    async likeMessage({ commit }, payload) {
+      const resp = await axiosWebApi.post(
+        Api.chat.likeMessage,
+        payload,
+        { isMock: false }
+      );
+      return resp;
+    },
+    async getLikedUsers({ commit }, payload) {
+      const resp = await axiosWebApi.post(
+        Api.chat.likedusers,
+        payload,
+        { isMock: false }
+      );
+      return resp;
+    },
   },
 };
