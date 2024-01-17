@@ -1,15 +1,17 @@
 # Groupchat App
 
-    This is a simple group chat application which enables users to chat with each other in a group. 
-
-### Tech Stack Used
-    UI: Vue JS
-    API: Node JS
-    DB: MySQL
-  ### Required Softwares/Tools 
+    This is a simple group chat application which enables users to chat with each other in a group.
+    There are two types of users - admin and normal users. When you click Signup then you create account as an admin.
+    When an admin signs in and clicks on the 'Add User' link and provides credentials then a normal user is created. 
+    Only admin can add users, create a group, and remove participants from the group. 
+    Each user of a group can chat with every other user and like each other's messages in real time.
+    Every user can see all other users and add participants in that group and check who has liked messages as well.
+    
+  ### Softwares/Tools used
     1. Node js 
     2. Vue-CLI 
     3. MySQL
+    4. MySQL Workbench
   ### Source Code
 [https://github.com/amarkant814/groupchat.git](https://github.com/Amarkant814/groupchat.git)
 
@@ -101,13 +103,35 @@ CREATE TABLE `user_msg_like_map` (
 
 ```
 
+### DB Connection
+    Go to file: Server/src/config/config.js
+    update the below keys with your local db configurations
+    const DATABASE = {
+        NAME:'YOUR-DB-NAME',
+        USER: 'YOUR-DB-USER',
+        HOST:'YOUR-DB-HOST',
+        PASSWORD:'YOUR-DB-PASSWORD',
+        PORT:'3306',
+        DIALECT: 'mysql'
+    }
+
  ### Commands for Node Server
     In terminal go to path groupchat/Server
    ### Run 
       npm install
       node src/index.js
   ### Commands for UI 
-    In terminal go to path groupchat/UI
+    In another terminal go to path groupchat/UI
  ### Run
     npm install 
     npm run serve 
+### Functionalities 
+    Open any browser and the paste the below link- 
+    http://localhost:8080
+    Signup with new user(Admin)
+    Signin with created user credentials
+    Add multiple new users (Click on Profile icon on the top right corner of the interface)
+    Create New group 
+    Open same link (http://localhost:8080) in multiple tabs
+    Signin with newly added user credentials by admin
+    Start group conversation
