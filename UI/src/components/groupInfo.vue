@@ -85,7 +85,8 @@
     computed: {
       ...mapGetters({
         getGroupInfo: "getGroupInfo",
-        getAllUsers: 'getAllUsers'
+        getAllUsers: 'getAllUsers',
+        getUserRole: 'getUserRole'
       }),
       userInfo(){
         return this.getGroupInfo.user_info
@@ -105,6 +106,10 @@
         fetchGroupUsers: 'fetchGroupUsers'
       }),
       removeDialog(data){
+        if(this.getUserRole != 1){
+          this.$toast.add({summary:'Only admins can remove participants', severity:'warn', life:3000});
+          return;
+        }
         this.deletedUser = data.id
         this.showRemoveUser = true
       },

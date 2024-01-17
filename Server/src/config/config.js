@@ -4,10 +4,10 @@ const respData = {status:undefined, results: undefined, err:undefined}
 const SERVER_ERROR = 'INTERNAL_SERVER_ERROR'
 
 const DATABASE = {
-    NAME:'socketdb',
-    USER: 'root',
-    HOST:'127.0.0.1',
-    PASSWORD:'A143@smq',
+    NAME:'YOUR-DB-NAME',
+    USER: 'YOUR-DB-USER',
+    HOST:'YOUR-DB-HOST',
+    PASSWORD:'YOUR-DB-PASSWORD',
     PORT:'3306',
     DIALECT: 'mysql'
 }
