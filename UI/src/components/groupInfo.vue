@@ -20,8 +20,8 @@
           </template>
         </Column>
         <Column field="actions" :header="`Action`">
-          <template #body="{slotProps}">
-            <span style="cursor: pointer;" @click="removeDialog(slotProps)"><i class="pi pi-trash"></i></span>
+          <template #body="slotProps">
+            <span style="cursor: pointer;" @click="removeDialog(slotProps.data)"><i class="pi pi-trash"></i></span>
           </template>
         </Column>
       </DataTable>
@@ -85,7 +85,8 @@
     computed: {
       ...mapGetters({
         getGroupInfo: "getGroupInfo",
-        getAllUsers: 'getAllUsers'
+        getAllUsers: 'getAllUsers',
+        getUserRole: 'getUserRole'
       }),
       userInfo(){
         return this.getGroupInfo.user_info
@@ -101,9 +102,14 @@
       ...mapActions({
         fetchAllUsers: "fetchAllUsers",
         addNewParticipant: "addNewParticipant",
-        deleteUserFromGroup: "deleteUserFromGroup"
+        deleteUserFromGroup: "deleteUserFromGroup",
+        fetchGroupUsers: 'fetchGroupUsers'
       }),
       removeDialog(data){
+        if(this.getUserRole != 1){
+          this.$toast.add({summary:'Only admins can remove participants', severity:'warn', life:3000});
+          return;
+        }
         this.deletedUser = data.id
         this.showRemoveUser = true
       },
@@ -115,6 +121,8 @@
         const resp = await this.deleteUserFromGroup(payload)
         if(resp.status == 200){
           this.$toast.add({severity:'success', summary: 'User Removed from group ', life:3000})
+          this.showRemoveUser = false;
+          await this.fetchGroupUsers({ groupID: this.getGroupInfo.group_info[0].id})
         }
       },
       async addNewUser(){
@@ -130,6 +138,7 @@
         if(resp.status == 201 ){
           this.$toast.add({severity:'success', summary: 'New Users Added ', life:3000})
           this.showAddUser = false;
+          await this.fetchGroupUsers({ groupID: this.getGroupInfo.group_info[0].id})
         }
       }
     },

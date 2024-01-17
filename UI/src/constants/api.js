@@ -11,7 +11,9 @@ export default {
     sendChat: '/api/chat',
     groupInfo: '/api/groupinfo',
     newParticipant: '/api/addparticipant',
-    deleteParticipant: '/api/deleteparticipant'
+    deleteParticipant: '/api/deleteparticipant',
+    likeMessage: '/api/like',
+    likedusers: '/api/likedusers'
   },
   messageBoard: {
     setUserNames: devAssignment + "userInfo/",

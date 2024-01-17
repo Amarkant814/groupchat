@@ -4,6 +4,8 @@ const pool = require('../../connection');
 const router = express.Router();
 const moment = require('moment')
 const db = require('../../models');
+const { where } = require('sequelize');
+const { convertDBRespToObject } = require('../../utils');
 const Op = db.Sequelize.Op;
 
 
@@ -66,8 +68,14 @@ router.post('/addgroup',async (req,res) => {
 router.get('/groups', async (req,res) => {
     let groupList = []
     try {
-        const resp = await db.GroupUserMap.findAll({where:{ user_id: req.user.id}})
-        const groupIds = resp.map(item => item.group_id)
+        const resp = await db.GroupUserMap.findAll({where:{ user_id: req.user.id, status:1}, order: [['id','DESC']]})
+        let group_set = new Set();
+        const groupStatus = resp.map(item => {
+            group_set.add(JSON.stringify({id: item.group_id, status: item.status}))
+            return {id: item.group_id, status: item.status}
+        })
+        let group_arr = Array.from(group_set).map(JSON.parse)
+        const groupIds = group_arr.map(item => item.id)
         const grp_resp = await db.Groups.findAll({where:{ id: groupIds}, order:[['created_on','DESC']]})
         const msg_resp = await db.Messages.findAll({
             where: { 
@@ -86,6 +94,7 @@ router.get('/groups', async (req,res) => {
                 id: item.id,
                 name: item.groupname,
                 createdAt: item.created_on,
+                status:group_arr.find(el => el.id == item.id).status,
                 msgs: [],
             }
             let retVal = [];
@@ -104,9 +113,21 @@ router.get('/groups', async (req,res) => {
             item.msgs = retVal
             groupList.push(item)
         })
+
+        const like_resp = convertDBRespToObject(await db.UserMessageMap.findAll({where: {user_id: req.user.id}}))
+        const lId = like_resp.map(it => it.m_id)
+        if(like_resp.length>0){
+            groupList.forEach(item => {
+                item.msgs.forEach(el => {
+                    el['mylike'] = lId.indexOf(el.id) !== -1
+                })
+            })
+        }
+
+        
         res.status(200).json({chats:groupList})
     } catch (error) {
-        console.log(error.message)
+        console.log(error)
         res.status(500).json({error: SERVER_ERROR})
     }
 })
@@ -125,7 +146,7 @@ router.post('/chat', async (req,res) => {
             res.status(201).json({info: 'Message Sent'})
         }
     } catch (error) {
-        console.log('Error: '+error.message)
+        console.log(error)
         res.status(500).json({error: SERVER_ERROR})
     }
 })
@@ -152,7 +173,7 @@ router.post('/groupinfo', async (req,res) => {
         user_info = {user_info,group_info}
         res.status(200).json({groupData:user_info})
     } catch (error) {
-        console.log('Error: '+error.message)
+        console.log(error)
         res.status(500).json({error: SERVER_ERROR})
     }
 })
@@ -175,7 +196,7 @@ router.post('/addparticipant', async (req,res) => {
             res.status(201).json({info: 'New Participants added'})
         }
     } catch (error) {
-        console.log('Error: '+error.message)
+        console.log(error)
         res.status(500).json({error:SERVER_ERROR})
     }
 })
@@ -195,7 +216,59 @@ router.post('/deleteparticipant',async (req,res) =>{
             res.status(200).json({info: 'User removed from group'})
         }
     } catch (error) {
-        console.log('Error: '+error.message)
+        console.log(error)
+        res.status(500).json({error:SERVER_ERROR})
+    }
+})
+
+
+router.post('/like',async (req,res) => {
+    const t = await db.sequelize.transaction();
+    const { m_id, type } = req.body
+    if(!m_id || !type){
+        res.status(400).json({error:'Missing Required fields'})
+        return
+    }
+    try {
+        const msg = await db.Messages.findOne({where:{id: m_id}})
+        if(!msg){
+            res.status(400).json({error:'Message not found'})
+            return
+        }
+        const msg_like_count = msg.likes
+        if(type == 'unlike'){
+            if(msg_like_count>0){
+                await db.UserMessageMap.destroy({where:{m_id:m_id, user_id:req.user.id}}, {transaction:t})
+                await db.Messages.update({likes:msg_like_count-1}, {where:{id: m_id}, transaction:t})
+                await t.commit();
+            }
+        }
+        else if(type == 'like'){
+            await db.UserMessageMap.create({m_id:m_id, user_id:req.user.id}, {transaction:t})
+            await db.Messages.update({likes:msg_like_count+1}, {where:{id: m_id},transaction:t})
+            await t.commit();
+        }
+        res.status(200).json({info: 'Message like updated'})
+    } catch (error) {
+        await t.rollback();
+        console.log(error)
+        if(error.name == 'SequelizeUniqueConstraintError'){
+            res.status(400).json({error: 'Message liked already'})
+            return
+        }
+        res.status(500).json({error:SERVER_ERROR})
+    }
+})
+
+
+router.post('/likedusers', async (req,res) =>{
+    const { m_id } = req.body
+    try {
+        const liked_users = await db.UserMessageMap.findAll({where:{m_id:m_id}})
+        const users = await db.User.findAll({where:{id:liked_users.map(it => it.user_id)}})
+        res.status(200).json({users:users.map(it => it.username)})
+    } catch (error) {
+        console.log(error);
         res.status(500).json({error:SERVER_ERROR})
     }
 })

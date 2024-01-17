@@ -16,7 +16,7 @@ router.post('/login', (req, res, next) => {
           status: 'error',
         });
       } else if (!user) {
-        return res.json({ token: false });
+        return res.status(400).json({ token: false , msg:'Invalid Credentials' });
       }
       let token;
       const userDetails = {

@@ -8,8 +8,11 @@
           <span class="message-display">
             <div class="msg-bar">
               <span class="message-content">{{ item.content }}</span>
-              <span class="flex align-items-center" v-if="item.likes && showLike && showLike.mid"><span class="" ><i class="pi pi-heart-fill" @click="addOrRemoveLike(item.id,'unlike')" ></i><span>{{ item.likes }}</span></span></span>
-              <span v-else> <i class="pi pi-heart"  @click="addOrRemoveLike(item.id,'like')"></i></span>
+              <span class="like-content">
+                <span class="flex align-items-center" v-if="item.mylike"><i class="pi pi-heart-fill" @click="addOrRemoveLike(item.id,'unlike')" ></i></span>
+                <span v-else> <i class="pi pi-heart"  @click="addOrRemoveLike(item.id,'like')"></i></span>
+                <span v-if="item.likes" @click="showLikes(item.id)" style="margin-top:5px">{{ item.likes }}</span>
+              </span>
             </div>
             <span class="message-time">{{ formatDate(item.timestamp) }}</span>
           </span>
@@ -20,8 +23,11 @@
           <span class="message-display">
             <div class="msg-bar">
               <span class="message-content">{{ item.content }}</span>
-              <span class="flex align-items-center" v-if="item.likes && showLike && showLike.mid"><span class="" ><i class="pi pi-heart-fill" @click="addOrRemoveLike(item.id,'unlike')" ></i><span>{{ item.likes }}</span></span></span>
-              <span v-else> <i class="pi pi-heart"  @click="addOrRemoveLike(item.id,'like')"></i></span>
+              <span class="like-content">
+                <span class="flex align-items-center" v-if="item.mylike"><i class="pi pi-heart-fill" @click="addOrRemoveLike(item.id,'unlike')" ></i></span>
+                <span v-else> <i class="pi pi-heart"  @click="addOrRemoveLike(item.id,'like')"></i></span>
+                <span v-if="item.likes" @click="showLikes" style="margin-top:5px">{{ item.likes }}</span>
+              </span>
             </div>
             <span class="message-time">{{ formatDate(item.timestamp) }}</span>
           </span>
@@ -30,6 +36,11 @@
       </div>
     </div>
   </div>
+  <Dialog v-model:visible="showLikedUser" modal :closable="true" :header="likedHeader" :style="{ width: '50vw' }">
+    <div v-for="user in likedUsers">
+      {{ user }}
+    </div>
+    </Dialog>
 </template>
 
 <script>
@@ -38,7 +49,9 @@ export default {
   name: "ChatSmsApp",
   data() {
     return {
-      showLike: {}
+      showLikedUser:false,
+      likedHeader: 'Users that liked this message: ',
+      likedUsers:[],
     };
   },
   props: {
@@ -53,25 +66,25 @@ export default {
     }),
   },
   methods: {
-    ...mapActions({}),
-    addOrRemoveLike(mid,action){
-      if(action == 'like'){
-        this.showLike[mid] = false;
-        if(this.messages.msgs[mid-1].likes){
-          this.messages.msgs[mid-1].likes += 1
-        }
-        else{
-          this.messages.msgs[mid-1].likes = 1
-        }
+    ...mapActions({
+      getAllChats: "getAllChats",
+      likeMessage: "likeMessage",
+      getLikedUsers: "getLikedUsers"
+    }),
+    async addOrRemoveLike(mId,action){
+      let payload = {
+        m_id:mId,
+        type:action,
+        group_id: this.messages.id
       }
-      else if(action == 'unlike'){
-        this.showLike[mid] = true;
-        if(this.messages.msgs[mid-1].likes){
-          this.messages.msgs[mid-1].likes -= 1
-        }
-        else{
-          this.messages.msgs[mid-1].likes = 0
-        }
+      await this.likeMessage(payload);
+      this.$emit('likeChat',payload)
+    },
+    async showLikes(message_id){
+      const resp = await this.getLikedUsers({m_id:message_id});
+      if(resp.status == 200){
+        this.showLikedUser = true
+        this.likedUsers = resp.data.users
       }
     },
     formatDate(value) {
