@@ -122,6 +122,8 @@ CREATE TABLE `user_msg_like_map` (
       node src/index.js
   ### Commands for UI 
     In another terminal go to path groupchat/UI
+  ### If Vue-CLI not installed
+      npm install -g @vue/cli
  ### Run
     npm install 
     npm run serve 
@@ -132,6 +134,7 @@ CREATE TABLE `user_msg_like_map` (
     Signin with created user credentials
     Add multiple new users (Click on Profile icon on the top right corner of the interface)
     Create New group 
-    Open same link (http://localhost:8080) in multiple tabs
+    Open same link 
+    http://localhost:8080 in multiple tabs
     Signin with newly added user credentials by admin
     Start group conversation
