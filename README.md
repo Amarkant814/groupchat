@@ -15,10 +15,6 @@
   ### Source Code
 [https://github.com/amarkant814/groupchat.git](https://github.com/Amarkant814/groupchat.git)
 
-  ## DB schema name
-    socketdb
-
-
   ## DB Tables 
   users 
   ```
